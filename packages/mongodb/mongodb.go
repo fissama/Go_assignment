@@ -16,8 +16,10 @@ const (
 )
 
 func NewMongoDBConnect(ctx context.Context) (*mongo.Client, error) {
+	//Get config in ./configs/config_dev.json
 	config := configs.GetConfig()
 
+	//Init mongo db options
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI("mongodb+srv://" + config.User + ":" + config.Password + "@" + config.Cluster + "/test?retryWrites=true&w=majority").
 		SetConnectTimeout(connectTimeout).
@@ -26,6 +28,7 @@ func NewMongoDBConnect(ctx context.Context) (*mongo.Client, error) {
 		SetMaxPoolSize(maxPoolSize).
 		SetServerAPIOptions(serverAPIOptions)
 
+	//Start opening mongo db connection
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		return nil, err
