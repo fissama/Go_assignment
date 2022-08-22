@@ -3,6 +3,7 @@ package main
 import (
 	"Go/services"
 	"github.com/labstack/echo/v4"
+	"strings"
 )
 
 type (
@@ -16,12 +17,18 @@ func insertCsv(c echo.Context) error {
 	// Get csv file
 	fileInsert, err := c.FormFile("FileData")
 	if err != nil {
-		return c.JSON(200, HttpResponse{Code: "415", Message: "Insert failed. Err:" + err.Error()})
+		return c.JSON(200, HttpResponse{Code: "417", Message: "Insert failed. Err:" + err.Error()})
+	}
+
+	//Check if file is not .csv => return
+	nameFile := fileInsert.Filename
+	if !strings.HasSuffix(nameFile, ".csv") {
+		return c.JSON(200, HttpResponse{Code: "415", Message: "Insert failed. File is not supported"})
 	}
 
 	src, err := fileInsert.Open()
 	if err != nil {
-		return c.JSON(200, HttpResponse{Code: "415", Message: "Insert failed. Err:" + err.Error()})
+		return c.JSON(200, HttpResponse{Code: "400", Message: "Insert failed. Err:" + err.Error()})
 	}
 	defer src.Close()
 
