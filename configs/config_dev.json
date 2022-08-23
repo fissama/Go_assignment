@@ -1,8 +1,8 @@
 {
-  "URI": "mongodb+srv://fissama:GCJ4722gm8nFKfGJ@sample.wxo2v4d.mongodb.net/test",
-  "Cluster": "sample.wxo2v4d.mongodb.net",
-  "User": "fissama",
-  "Password":"StceYnq39UfV5yFG",
-  "DB": "numbers",
-  "Collection": "assignment_number"
+  "URI": "sample_uri",
+  "Cluster": "sample_cluster",
+  "User": "sample_user",
+  "Password":"sample_password",
+  "DB": "sample_db",
+  "Collection": "sample_collection"
 }
