@@ -1,9 +1,13 @@
 package main
 
 import (
+	"Go/configs"
+	"Go/packages/mongodb"
 	"Go/services"
+	"context"
 	"github.com/labstack/echo/v4"
 	"strings"
+	"time"
 )
 
 type (
@@ -13,7 +17,23 @@ type (
 	}
 )
 
-func insertCsv(c echo.Context) error {
+func InsertCsv(c echo.Context) error {
+	//Get config from config_dev.json
+	config := configs.GetConfig()
+
+	//Create context
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	//Open mongodb connection
+	mongoClient, err := mongodb.NewMongoDBConnect(ctx, config)
+	if err != nil {
+		return c.JSON(200, HttpResponse{Code: "503", Message: "Failed to connect CosmosDB. Err:" + err.Error()})
+	}
+
+	//Get numbers collections from mongoClient
+	numbersCollection := mongoClient.Database(config.DB).Collection(config.Collection)
+
 	// Get csv file
 	fileInsert, err := c.FormFile("FileData")
 	if err != nil {
@@ -32,7 +52,7 @@ func insertCsv(c echo.Context) error {
 	}
 	defer src.Close()
 
-	err = services.InsertListAssignments(src)
+	err = services.InsertListAssignments(ctx, src, numbersCollection)
 	if err != nil {
 		return c.JSON(200, HttpResponse{Code: "400", Message: "Insert failed. Err:" + err.Error()})
 	}
@@ -42,6 +62,6 @@ func insertCsv(c echo.Context) error {
 
 func main() {
 	e := echo.New()
-	e.POST("/assignment/insert", insertCsv)
+	e.POST("/assignment/insert", InsertCsv)
 	e.Logger.Fatal(e.Start(":1323"))
 }

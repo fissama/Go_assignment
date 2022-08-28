@@ -1,25 +1,16 @@
 package services
 
 import (
-	"Go/packages/mongodb"
 	"Go/repositories"
 	"bufio"
 	"context"
+	"go.mongodb.org/mongo-driver/mongo"
+	"log"
 	"mime/multipart"
 	"sync"
-	"time"
 )
 
-func InsertListAssignments(file multipart.File) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	//Open mongodb connection
-	mongoClient, err := mongodb.NewMongoDBConnect(ctx)
-	if err != nil {
-		return err
-	}
-
+func InsertListAssignments(ctx context.Context, file multipart.File, numbersCollection *mongo.Collection) error {
 	//Create channel
 	ch := make(chan string)
 	//Create waitgroup
@@ -35,7 +26,9 @@ func InsertListAssignments(file multipart.File) error {
 			//Mark waitgroup done
 			defer wg.Done()
 			for line := range ch {
-				repositories.InsertAssignment(line, mongoClient)
+				if result, err := repositories.InsertAssignment(ctx, line, numbersCollection); !result {
+					log.Fatal(err)
+				}
 			}
 		}(ch, &wg)
 	}

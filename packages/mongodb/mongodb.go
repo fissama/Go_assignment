@@ -15,10 +15,7 @@ const (
 	maxPoolSize     = 100
 )
 
-func NewMongoDBConnect(ctx context.Context) (*mongo.Client, error) {
-	//Get config in ./configs/config_dev.json
-	config := configs.GetConfig()
-
+func NewMongoDBConnect(ctx context.Context, config configs.MongoDB) (*mongo.Client, error) {
 	//Init mongo db options
 	serverAPIOptions := options.ServerAPI(options.ServerAPIVersion1)
 	clientOptions := options.Client().ApplyURI("mongodb+srv://" + config.User + ":" + config.Password + "@" + config.Cluster + "/test?retryWrites=true&w=majority").

@@ -1,10 +1,8 @@
 package repositories
 
 import (
-	"Go/configs"
 	"context"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 	"strconv"
 	"time"
 )
@@ -16,10 +14,10 @@ type (
 	}
 )
 
-func InsertAssignment(number string, client *mongo.Client) bool {
+func InsertAssignment(ctx context.Context, number string, numbersCollection *mongo.Collection) (bool, error) {
 	n, err := strconv.Atoi(number)
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 
 	newAssignment := &Assignment{
@@ -27,14 +25,7 @@ func InsertAssignment(number string, client *mongo.Client) bool {
 		InsertAt: time.Now().UTC(),
 	}
 
-	config := configs.GetConfig()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	numbersCollection := client.Database(config.DB).Collection(config.Collection)
-
 	numbersCollection.InsertOne(ctx, newAssignment)
 
-	return true
+	return true, nil
 }
